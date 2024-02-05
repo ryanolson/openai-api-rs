@@ -89,7 +89,7 @@ impl_builder_methods!(
     tool_choice: ToolChoiceType
 );
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 pub enum MessageRole {
     user,
