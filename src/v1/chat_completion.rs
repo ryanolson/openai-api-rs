@@ -1,7 +1,9 @@
+use serde::de::{self, SeqAccess, Visitor};
 use serde::ser::SerializeMap;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::fmt;
 
 use crate::impl_builder_methods;
 use crate::v1::common;
@@ -116,6 +118,53 @@ impl serde::Serialize for Content {
     }
 }
 
+fn deserialize_content<'de, D>(deserializer: D) -> Result<Content, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    struct ContentVisitor;
+
+    impl<'de> Visitor<'de> for ContentVisitor {
+        type Value = Content;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a string or an array of content parts")
+        }
+
+        fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            Ok(Content::Text(value.to_owned()))
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut parts = Vec::new();
+            while let Some(value) = seq.next_element::<String>()? {
+                if value.starts_with("http://") || value.starts_with("https://") {
+                    parts.push(ImageUrl {
+                        r#type: ContentType::image_url,
+                        text: None,
+                        image_url: Some(ImageUrlType { url: value }),
+                    });
+                } else {
+                    parts.push(ImageUrl {
+                        r#type: ContentType::text,
+                        text: Some(value),
+                        image_url: None,
+                    });
+                }
+            }
+            Ok(Content::ImageUrl(parts))
+        }
+    }
+
+    deserializer.deserialize_any(ContentVisitor)
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 pub enum ContentType {
@@ -142,7 +191,10 @@ pub struct ImageUrl {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ChatCompletionMessage {
     pub role: MessageRole,
+
+    #[serde(deserialize_with = "deserialize_content")]
     pub content: Content,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }
