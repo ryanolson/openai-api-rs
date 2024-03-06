@@ -22,3 +22,7 @@ default-features = false
 version = "2"
 default-features = false
 features = ["https-rustls", "json-using-serde", "proxy"]
+
+[dependencies]
+utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }

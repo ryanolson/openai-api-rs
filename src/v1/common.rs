@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(ToSchema, Debug, Deserialize, Serialize)]
 pub struct Usage {
     pub prompt_tokens: i32,
     pub completion_tokens: i32,

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::option::Option;
+use utoipa::ToSchema;
 
 use crate::impl_builder_methods;
 use crate::v1::common;
@@ -18,7 +19,7 @@ pub const GPT3_CURIE: &str = "curie";
 pub const GPT3_ADA: &str = "ada";
 pub const GPT3_BABBAGE: &str = "babbage";
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(ToSchema, Debug, Serialize, Deserialize, Clone)]
 pub struct CompletionRequest {
     pub model: String,
     pub prompt: String,
@@ -93,7 +94,7 @@ impl_builder_methods!(
     user: String
 );
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(ToSchema, Debug, Deserialize, Serialize)]
 pub struct CompletionChoice {
     pub text: String,
     pub index: i64,
@@ -101,7 +102,7 @@ pub struct CompletionChoice {
     pub logprobs: Option<LogprobResult>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(ToSchema, Debug, Deserialize, Serialize)]
 pub struct LogprobResult {
     pub tokens: Vec<String>,
     pub token_logprobs: Vec<f32>,
@@ -109,7 +110,7 @@ pub struct LogprobResult {
     pub text_offset: Vec<i32>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(ToSchema, Debug, Deserialize, Serialize)]
 pub struct CompletionResponse {
     pub id: String,
     pub object: String,
