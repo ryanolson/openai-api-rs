@@ -98,7 +98,7 @@ impl_builder_methods!(
 pub struct CompletionChoice {
     pub text: String,
     pub index: i64,
-    pub finish_reason: String,
+    pub finish_reason: Option<String>,
     pub logprobs: Option<LogprobResult>,
 }
 
